@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -36,7 +37,7 @@ public class EnemySpawner : MonoBehaviour
         var newEnemy = Instantiate(Enemies[type], Path1[0].transform.position, Path1[0].transform.rotation);
         var script = newEnemy.GetComponent<Enemy>();
         script.path = path;
-        script.target = Path1[1]; // Set the initial target
+        script.target = Path1[1];
 
     }
 
