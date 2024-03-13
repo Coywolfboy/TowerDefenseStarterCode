@@ -1,6 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
-    <ui:VisualElement style="flex-grow: 1;" />
-    <ui:Button text="Archer Tower" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Button1" style="left: -1px; top: 419px; right: auto; opacity: 1; width: 109px; height: 0; background-color: rgb(109, 109, 109);" />
-    <ui:Button text="Sword Tower" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Button2" style="left: 113px; top: 393px; right: auto; opacity: 1; width: 109px; height: 0; background-color: rgb(109, 109, 109);" />
-    <ui:Button text="Archer Tower" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Button3" style="left: 219px; top: 366px; right: auto; opacity: 1; width: 109px; height: 0; background-color: rgb(109, 109, 109);" />
-</ui:UXML>
