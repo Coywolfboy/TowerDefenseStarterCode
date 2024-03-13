@@ -11,6 +11,11 @@ public class Enemy : MonoBehaviour
     public GameObject target { get; set; }
     private int pathIndex = 1;
 
+    void Start()
+    {
+
+    }
+
     void Update()
     {
         float step = speed * Time.deltaTime;

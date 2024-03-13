@@ -1,61 +1,88 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Unity.PlasticSCM.Editor.WebApi.CredentialsResponse;
 
+
 public class Tower : MonoBehaviour
 {
-    public float attackRange = 1f; // Range within which the tower can detect and attack enemies
-    public float attackRate = 1f; // How often the tower attacks (attacks per second)
-    public int attackDamage = 1; // How much damage each attack does
-    public float attackSize = 1f; // How big the bullet looks
-    public float projectileSpeed = 5f; // Speed of the projectile
+    public float attackRange = 1f; // Range within which the tower can detect and attack enemies 
+    public float attackRate = 1f; // How often the tower attacks (attacks per second) 
+    public int attackDamage = 1; // How much damage each attack does 
+    public float attackSize = 1f; // How big the bullet looks 
+    public float projectileSpeed = 10f; // Speed of the projectile
+    public GameObject bulletPrefab; // The bullet prefab the tower will shoot 
+    public TowerType type; // the type of this tower 
 
-    public GameObject bulletPrefab; // The bullet prefab the tower will shoot
-    public TowerType type; // the type of this tower
+    private float nextAttackTime = 0f; // Timer to track the next attack time
 
-    // Draw the attack range in the editor for easier debugging
+    // Draw the attack range in the editor for easier debugging 
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    void Start()
+    // Update is called once per frame
+    void Update()
     {
-        InvokeRepeating("Attack", 0f, 1f / attackRate); // Start attacking at the specified rate
+        // Check if it's time to attack
+        if (Time.time >= nextAttackTime)
+        {
+            // Scan for enemies and shoot
+            ScanForEnemiesAndShoot();
+            // Update the next attack time
+            nextAttackTime = Time.time + 1f / attackRate;
+        }
     }
 
-    void Attack()
+    // Method to scan for enemies within range and shoot at one of them
+    void ScanForEnemiesAndShoot()
     {
-        // Find all enemies within the attack range
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+        // Find all colliders within the attack range
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
 
-        foreach (Collider2D collider in colliders)
+        // Iterate through each collider found
+        foreach (Collider2D col in hitColliders)
         {
-            if (collider.CompareTag("Enemy"))
+            // Check if the collider belongs to an enemy
+            if (col.CompareTag("Enemy"))
             {
-                ShootAtEnemy(collider.transform);
-                return; // Only shoot at one enemy per attack cycle
+                // Shoot at the enemy
+                ShootAtEnemy(col.gameObject);
+                // Exit the loop after shooting at one enemy
+                break;
             }
         }
     }
 
-    void ShootAtEnemy(Transform target)
+    // Method to shoot at a specific enemy
+    void ShootAtEnemy(GameObject enemy)
     {
-        // Instantiate the bullet prefab
+        // Instantiate the bullet prefab at the tower's position
         GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
 
-        // Set the properties of the projectile
+        // Set the scale of the bullet to the specified attack size
+        bullet.transform.localScale = new Vector3(attackSize, attackSize, 1f);
+
+        // Get the Projectile component from the bullet prefab
         Projectile projectile = bullet.GetComponent<Projectile>();
+
+        // Check if the Projectile component exists
         if (projectile != null)
         {
-            projectile.target = target;
-            projectile.speed = projectileSpeed;
+            // Set the damage of the projectile to the tower's attack damage
             projectile.damage = attackDamage;
+            // Set the target of the projectile to the enemy
+            projectile.target = enemy.transform;
+            // Set the speed of the projectile
+            projectile.speed = projectileSpeed;
         }
-
-        // Set the size of the projectile
-        bullet.transform.localScale = new Vector3(attackSize, attackSize, 1f);
+        else
+        {
+            // Log an error if the Projectile component is missing
+            Debug.LogError("Projectile component not found on bulletPrefab.");
+        }
     }
 }
