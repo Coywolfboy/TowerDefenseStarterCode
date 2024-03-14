@@ -11,6 +11,18 @@ public class Enemy : MonoBehaviour
     public GameObject target { get; set; }
     private int pathIndex = 1;
 
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            // Voer hier eventuele acties uit bij vernietiging van de vijand
+            Destroy(gameObject);
+        }
+    }
+
+
     void Start()
     {
 

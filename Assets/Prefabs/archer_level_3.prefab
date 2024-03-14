@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 669647712484868768}
   - component: {fileID: 8122490921905377585}
+  - component: {fileID: 8586791504711801204}
   m_Layer: 0
   m_Name: archer_level_3
   m_TagString: Untagged
@@ -70,8 +71,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -284844883
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 49763f91ff9a68644897226748ef2f76, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -84,3 +85,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8586791504711801204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4450901071696031580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 176695b1360885a4c8c3a6953aae31f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 4
+  attackRate: 1
+  attackDamage: 1
+  attackSize: 1
+  projectileSpeed: 5
+  bulletPrefab: {fileID: 1965857147555420834, guid: b625ee0d85625e94d9886c457f2e8c63, type: 3}
+  type: 0

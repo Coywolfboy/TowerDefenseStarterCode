@@ -8,27 +8,34 @@ public class Projectile : MonoBehaviour
     public float speed;
     public int damage;
 
-    void Start()
-    {
-        if (target != null)
-        {
-            Vector3 direction = target.position - transform.position;
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        }
-    }
-
     void Update()
     {
+        // Als het doelwit niet meer bestaat, vernietig het projectiel
         if (target == null)
         {
             Destroy(gameObject);
             return;
         }
-        transform.Translate(Vector2.right * speed * Time.deltaTime);
+
+        // Beweeg het projectiel naar het doelwit
+        Vector2 direction = (target.position - transform.position).normalized;
+        transform.Translate(direction * speed * Time.deltaTime);
+
+        // Controleer of het projectiel het doelwit heeft geraakt
         if (Vector2.Distance(transform.position, target.position) < 0.2f)
         {
+            // Breng schade toe aan het doelwit en vernietig het projectiel
+            DamageTarget();
             Destroy(gameObject);
+        }
+    }
+
+    // Methode om schade toe te brengen aan het doelwit
+    void DamageTarget()
+    {
+        if (target != null && target.CompareTag("Enemy"))
+        {
+            target.GetComponent<Enemy>().TakeDamage(damage);
         }
     }
 }
