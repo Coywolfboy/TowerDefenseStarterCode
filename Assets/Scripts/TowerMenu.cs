@@ -13,6 +13,8 @@ public class TowerMenu : MonoBehaviour
 
     private VisualElement root;
 
+    private ConstructionSite selectedSite;
+
     void Start()
     {
         root = GetComponent<UIDocument>().rootVisualElement;
@@ -49,6 +51,36 @@ public class TowerMenu : MonoBehaviour
         }
 
         root.visible = false;
+    }
+
+    public void SetSite(ConstructionSite site)
+    {
+        selectedSite = site;
+        EvaluateMenu();
+    }
+
+    public void EvaluateMenu()
+    {
+        if (selectedSite == null)
+        {
+            root.visible = false;
+            return;
+        }
+
+        // Implementeer de logica om de menuknoppen in- en uit te schakelen op basis van de geselecteerde site.
+        // Je kunt toegang krijgen tot de geselecteerde site via de variabele 'selectedSite'.
+
+        // Voorbeeld:
+        // if (selectedSite.SiteLevel == SiteLevel.Zero)
+        // {
+        //     archerButton.SetEnabled(true);
+        //     wizardButton.SetEnabled(true);
+        //     swordButton.SetEnabled(true);
+        //     updateButton.SetEnabled(false);
+        //     destroyButton.SetEnabled(false);
+        // }
+
+        // Voer deze logica uit voor elk niveau van de constructieplaats en de bijbehorende knoppen.
     }
 
     private void OnArcherButtonClicked()
