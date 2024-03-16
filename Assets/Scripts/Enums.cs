@@ -11,7 +11,7 @@ public enum TowerType
 }
 public enum SiteLevel
 {
-    Unbuilt,
+    Level0,
     Level1,
     Level2,
     Level3

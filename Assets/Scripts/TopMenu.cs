@@ -1,0 +1,52 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class TopMenu : MonoBehaviour
+{
+    public Text waveLabel;
+    public Text creditsLabel;
+    public Text healthLabel;
+    public Button startWaveButton;
+    public void UpdateTopMenuLabels(int credits, int health, int currentWave)
+    {
+        creditsLabel.text = "Credits: " + credits;
+        healthLabel.text = "Health: " + health;
+        waveLabel.text = "Wave: " + currentWave;
+    }
+    private void Start()
+    {
+        // Voeg een luisteraar toe aan de StartWaveButton
+        startWaveButton.onClick.AddListener(OnStartWaveButtonClicked);
+    }
+
+    private void OnDestroy()
+    {
+        // Verwijder de luisteraar om geheugenlekken te voorkomen
+        startWaveButton.onClick.RemoveListener(OnStartWaveButtonClicked);
+    }
+
+    // Functie om de wave-label bij te werken
+    public void SetWaveLabel(string text)
+    {
+        waveLabel.text = text;
+    }
+
+    // Functie om de credits-label bij te werken
+    public void SetCreditsLabel(string text)
+    {
+        creditsLabel.text = text;
+    }
+
+    // Functie om de health-label bij te werken
+    public void SetHealthLabel(string text)
+    {
+        healthLabel.text = text;
+    }
+
+    // Functie die wordt aangeroepen wanneer de StartWaveButton wordt geklikt
+    private void OnStartWaveButtonClicked()
+    {
+        // Voeg hier de logica toe om een nieuwe wave te starten
+        Debug.Log("Wave gestart!");
+    }
+}

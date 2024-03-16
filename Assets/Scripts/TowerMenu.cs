@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -15,15 +13,30 @@ public class TowerMenu : MonoBehaviour
 
     private ConstructionSite selectedSite;
 
+    public static TowerMenu Instance;
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         root = GetComponent<UIDocument>().rootVisualElement;
 
-        archerButton = root.Q<Button>("archer-button");
-        swordButton = root.Q<Button>("sword-button");
-        wizardButton = root.Q<Button>("wizard-button");
-        updateButton = root.Q<Button>("button-upgrade");
-        destroyButton = root.Q<Button>("button-destroy");
+        archerButton = root.Q<Button>("archer");
+        swordButton = root.Q<Button>("sword");
+        wizardButton = root.Q<Button>("wizard");
+        updateButton = root.Q<Button>("button");
+        destroyButton = root.Q<Button>("button");
 
         if (archerButton != null)
         {
@@ -67,49 +80,96 @@ public class TowerMenu : MonoBehaviour
             return;
         }
 
-        // Implementeer de logica om de menuknoppen in- en uit te schakelen op basis van de geselecteerde site.
-        // Je kunt toegang krijgen tot de geselecteerde site via de variabele 'selectedSite'.
+        // Haal de beschikbare credits op van de GameManager
+        int availableCredits = GameManager.Instance.GetCredits();
 
-        // Voorbeeld:
-        // if (selectedSite.SiteLevel == SiteLevel.Zero)
-        // {
-        //     archerButton.SetEnabled(true);
-        //     wizardButton.SetEnabled(true);
-        //     swordButton.SetEnabled(true);
-        //     updateButton.SetEnabled(false);
-        //     destroyButton.SetEnabled(false);
-        // }
-
-        // Voer deze logica uit voor elk niveau van de constructieplaats en de bijbehorende knoppen.
+        // Gebruik de beschikbare credits om de menuknoppen in of uit te schakelen
+        if (selectedSite.Level == SiteLevel.Level1)
+        {
+            // Voor Level1: Archers beschikbaar, anderen niet
+            archerButton.SetEnabled(true);
+            swordButton.SetEnabled(false);
+            wizardButton.SetEnabled(false);
+            updateButton.SetEnabled(false);
+            destroyButton.SetEnabled(true);
+        }
+        else if (selectedSite.Level == SiteLevel.Level2)
+        {
+            // Voor Level2: Archers en Swords beschikbaar, Wizard en Update niet
+            archerButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Archer, selectedSite.Level));
+            swordButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Sword, selectedSite.Level));
+            wizardButton.SetEnabled(false);
+            updateButton.SetEnabled(false);
+            destroyButton.SetEnabled(true);
+        }
+        else if (selectedSite.Level == SiteLevel.Level3)
+        {
+            // Voor Level3: Alle torens en Upgrade beschikbaar
+            archerButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Archer, selectedSite.Level));
+            swordButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Sword, selectedSite.Level));
+            wizardButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
+            updateButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(selectedSite.TowerType, selectedSite.Level + 1));
+            destroyButton.SetEnabled(true);
+        }
     }
+
+
 
     private void OnArcherButtonClicked()
     {
-        Debug.Log("Archer Tower button clicked");
+        GameManager.Instance.Build(TowerType.Archer, SiteLevel.Level1);
     }
 
     private void OnSwordButtonClicked()
     {
-        Debug.Log("Sword Tower button clicked");
+        GameManager.Instance.Build(TowerType.Sword, SiteLevel.Level1);
     }
 
     private void OnWizardButtonClicked()
     {
-        Debug.Log("Wizard Tower button clicked");
+        GameManager.Instance.Build(TowerType.Wizard, SiteLevel.Level1);
     }
 
     private void OnUpdateButtonClicked()
     {
-        Debug.Log("Upgrade button clicked");
+        // Check of selectedSite niet null is
+        if (selectedSite != null)
+        {
+            // Haal het huidige niveau van de geselecteerde site op
+            SiteLevel currentLevel = selectedSite.GetLevel();
+
+            // Controleer of het huidige niveau minder is dan Level3
+            if (currentLevel < SiteLevel.Level3)
+            {
+                // Verhoog het niveau met één
+                SiteLevel newLevel = currentLevel + 1;
+
+                // Stel het nieuwe niveau in voor de geselecteerde site
+                selectedSite.SetLevel(newLevel);
+
+                // Evalueer het menu opnieuw
+                EvaluateMenu();
+            }
+        }
     }
 
     private void OnDestroyButtonClicked()
     {
-        Debug.Log("Destroy button clicked");
+        // Controleer of de geselecteerde site niet null is
+        if (selectedSite != null)
+        {
+            // Stel het niveau van de geselecteerde site in op Level0
+            selectedSite.SetLevel(SiteLevel.Level0);
+
+            // Evalueer het menu opnieuw
+            EvaluateMenu();
+        }
     }
+
 
     private void OnDestroy()
     {
+        // Controleer of de knopobjecten niet null zijn om NullReferenceException te voorkomen
         if (archerButton != null)
         {
             archerButton.clicked -= OnArcherButtonClicked;
@@ -132,7 +192,9 @@ public class TowerMenu : MonoBehaviour
 
         if (destroyButton != null)
         {
-            destroyButton.clicked -= OnArcherButtonClicked;
+            destroyButton.clicked -= OnDestroyButtonClicked;
         }
     }
+
+    
 }

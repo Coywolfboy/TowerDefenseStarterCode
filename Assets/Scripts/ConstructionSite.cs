@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 public class ConstructionSite
 {
     public Vector3Int TilePosition { get; private set; }
@@ -13,7 +12,7 @@ public class ConstructionSite
     {
         TilePosition = tilePosition;
         WorldPosition = worldPosition + new Vector3(0, 0.5f, 0); // Pas de hoogte aan
-        Level = SiteLevel.Unbuilt;
+        Level = SiteLevel.Level0;
         tower = null;
     }
 
@@ -30,5 +29,22 @@ public class ConstructionSite
         tower = newTower;
         Level = newLevel;
         TowerType = newType;
+    }
+
+    public Vector3 GetBuildPosition()
+    {
+        return WorldPosition; // Gebruik de wereldpositie van de bouwplaats
+    }
+
+    // Vermoedelijk heb je een methode nodig om het niveau van de bouwplaats in te stellen
+    public void SetLevel(SiteLevel newLevel)
+    {
+        Level = newLevel;
+    }
+
+    // Vermoedelijk heb je ook een methode nodig om het niveau van de bouwplaats op te halen
+    public SiteLevel GetLevel()
+    {
+        return Level;
     }
 }

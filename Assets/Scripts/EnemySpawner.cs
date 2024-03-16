@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using static GameManager;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -20,31 +19,43 @@ public class EnemySpawner : MonoBehaviour
             Destroy(gameObject);
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void SpawnWave(WaveInfo wave)
     {
-        InvokeRepeating("SpawnTester", 1f, 1f);
+        StartCoroutine(SpawnEnemies(wave));
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator SpawnEnemies(WaveInfo wave)
     {
+        for (int i = 0; i < wave.enemyCount; i++)
+        {
+            // Spawn vijanden van niveau 0 (of het gewenste niveau) in de eerste wave
+            int enemyType = 0; // Hiermee spawnen we alleen vijanden van niveau 0 in de eerste wave
 
+            // Willekeurig kiezen tussen Path1 en Path2
+            Path path = Random.Range(0, 2) == 0 ? Path.Path1 : Path.Path2;
+
+            SpawnEnemy(enemyType, path);
+            yield return new WaitForSeconds(1f); // Wacht 1 seconde voordat een nieuwe vijand wordt gespawnd
+        }
     }
 
     private void SpawnEnemy(int type, Path path)
     {
-        var newEnemy = Instantiate(Enemies[type], Path1[0].transform.position, Path1[0].transform.rotation);
-        var script = newEnemy.GetComponent<Enemy>();
-        script.path = path;
-        script.target = Path1[1];
-
+        List<GameObject> selectedPath = path == Path.Path1 ? Path1 : Path2;
+        if (selectedPath.Count > 0)
+        {
+            var spawnPosition = selectedPath[0].transform.position;
+            var newEnemy = Instantiate(Enemies[type], spawnPosition, Quaternion.identity);
+            var script = newEnemy.GetComponent<Enemy>();
+            script.path = path;
+            script.target = selectedPath[1];
+        }
+        else
+        {
+            Debug.LogWarning("No path available for enemy spawn!");
+        }
     }
 
-    private void SpawnTester()
-    {
-        SpawnEnemy(0, Path.Path1);
-    }
 
     public GameObject RequestTarget(Path path, int index)
     {
