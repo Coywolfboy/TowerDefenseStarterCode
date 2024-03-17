@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static GameManager;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -19,12 +18,12 @@ public class EnemySpawner : MonoBehaviour
             Destroy(gameObject);
     }
 
-    public void SpawnWave(WaveInfo wave)
+    public void SpawnWave(GameManger.WaveInfo wave)
     {
         StartCoroutine(SpawnEnemies(wave));
     }
 
-    private IEnumerator SpawnEnemies(WaveInfo wave)
+    private IEnumerator SpawnEnemies(GameManger.WaveInfo wave)
     {
         for (int i = 0; i < wave.enemyCount; i++)
         {
@@ -55,7 +54,6 @@ public class EnemySpawner : MonoBehaviour
             Debug.LogWarning("No path available for enemy spawn!");
         }
     }
-
 
     public GameObject RequestTarget(Path path, int index)
     {

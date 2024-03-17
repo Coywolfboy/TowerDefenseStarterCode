@@ -21,7 +21,10 @@ public class Enemy : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    private void OnDestroy()
+    {
+        GameManger.Instance.DecreaseEnemyCount(); // Verminder het aantal resterende vijanden wanneer deze vijand wordt vernietigd
+    }
 
     void Start()
     {

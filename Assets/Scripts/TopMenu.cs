@@ -46,7 +46,7 @@ public class TopMenu : MonoBehaviour
     // Functie die wordt aangeroepen wanneer de StartWaveButton wordt geklikt
     private void OnStartWaveButtonClicked()
     {
-        // Voeg hier de logica toe om een nieuwe wave te starten
-        Debug.Log("Wave gestart!");
+        // Roep de StartWave-methode aan van GameManager om de volgende wave te starten
+        GameManger.Instance.StartWave(GameManger.Instance.GetCurrentWaveIndex() + 1); // Start de volgende wave
     }
 }

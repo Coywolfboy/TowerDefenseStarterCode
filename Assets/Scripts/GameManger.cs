@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManger : MonoBehaviour
 {
-    public static GameManager Instance; // Singleton instance
+    public static GameManger Instance; // Singleton instance
 
     // Lists of tower prefabs
     public List<GameObject> Archers;
@@ -17,12 +18,12 @@ public class GameManager : MonoBehaviour
     };
     public WaveInfo[] waves = new WaveInfo[]
     {
-        new WaveInfo(5, 1.0f),  // Golf 1: 5 vijanden met een sterkte van 1.0
-        new WaveInfo(7, 1.2f),  // Golf 2: 7 vijanden met een sterkte van 1.2
-        new WaveInfo(10, 1.5f)  // Golf 3: 10 vijanden met een sterkte van 1.5
+        new WaveInfo(10, 1.0f),  // Golf 1: 5 vijanden met een sterkte van 1.0
+        new WaveInfo(15, 1.2f),  // Golf 2: 7 vijanden met een sterkte van 1.2
+        new WaveInfo(20, 1.5f),  // Golf 3: 10 vijanden met een sterkte van 1.5
+        new WaveInfo(25, 2.0f)  // Golf 3: 10 vijanden met een sterkte van 1.5
     };
-
-
+    private int enemiesRemaining;
     private int credits;
     private int health;
     private int currentWave;
@@ -46,8 +47,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         StartGame(); // Start het spel, inclusief het initialiseren van golfinformatie, credits, enz.
+        currentWave = 0; // Zorg ervoor dat currentWave correct is geïnitialiseerd voordat de golven worden gestart
         StartNextWave(); // Start de eerste golf van vijanden
     }
+
 
     // Function to select a construction site
     public void SelectSite(ConstructionSite site)
@@ -59,16 +62,30 @@ public class GameManager : MonoBehaviour
         TowerMenu.Instance.SetSite(site);
 
     }
-    void StartNextWave()
+    public void StartNextWave()
     {
-        if (currentWave <= waves.Length)
+        if (currentWave < waves.Length && enemiesRemaining <= 0) // Controleer of er geen vijanden meer zijn voordat je doorgaat naar de volgende golf
         {
-            WaveInfo nextWave = waves[currentWave - 1]; // -1 omdat arrays op nul zijn gebaseerd, terwijl currentWave op 1 is gebaseerd
-            EnemySpawner.Instance.SpawnWave(nextWave); // Roep de methode aan om de golf van vijanden te spawnen
+            WaveInfo nextWave = waves[currentWave];
+            EnemySpawner.Instance.SpawnWave(nextWave);
+            currentWave++;
+            topMenu.UpdateTopMenuLabels(credits, health, currentWave);
+        }
+        else if (currentWave >= waves.Length)
+        {
+            Debug.LogWarning("Alle golven zijn voltooid.");
         }
         else
         {
-            Debug.LogWarning("Alle golven zijn voltooid.");
+            Debug.Log("Kan de volgende golf niet starten omdat er nog vijanden zijn.");
+        }
+    }
+    public void DecreaseEnemyCount()
+    {
+        enemiesRemaining--;
+        if (enemiesRemaining <= 0)
+        {
+            StartNextWave(); // Start de volgende golf als er geen vijanden meer zijn
         }
     }
 
@@ -181,6 +198,12 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Wave index out of range: " + waveIndex);
         }
     }
+    public int GetCurrentWaveIndex()
+    {
+        return currentWave - 1;
+    }
+
+
 
     public class WaveInfo
     {

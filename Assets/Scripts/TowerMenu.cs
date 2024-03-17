@@ -3,11 +3,11 @@ using UnityEngine.UIElements;
 
 public class TowerMenu : MonoBehaviour
 {
-    private Button archerButton;
-    private Button swordButton;
-    private Button wizardButton;
-    private Button updateButton;
-    private Button destroyButton;
+    private Button archer;
+    private Button sword;
+    private Button wizard;
+    private Button Upgrade;
+    private Button destroy;
 
     private VisualElement root;
 
@@ -32,35 +32,35 @@ public class TowerMenu : MonoBehaviour
     {
         root = GetComponent<UIDocument>().rootVisualElement;
 
-        archerButton = root.Q<Button>("archer");
-        swordButton = root.Q<Button>("sword");
-        wizardButton = root.Q<Button>("wizard");
-        updateButton = root.Q<Button>("button");
-        destroyButton = root.Q<Button>("button");
+        archer = root.Q<Button>("archer");
+        sword = root.Q<Button>("sword");
+        wizard = root.Q<Button>("wizard");
+        Upgrade = root.Q<Button>("Upgrade");
+        destroy = root.Q<Button>("destroy");
 
-        if (archerButton != null)
+        if (archer != null)
         {
-            archerButton.clicked += OnArcherButtonClicked;
+            archer.clicked += OnArcherButtonClicked;
         }
 
-        if (swordButton != null)
+        if (sword != null)
         {
-            swordButton.clicked += OnSwordButtonClicked;
+            sword.clicked += OnSwordButtonClicked;
         }
 
-        if (wizardButton != null)
+        if (wizard != null)
         {
-            wizardButton.clicked += OnWizardButtonClicked;
+            wizard.clicked += OnWizardButtonClicked;
         }
 
-        if (updateButton != null)
+        if (Upgrade != null)
         {
-            updateButton.clicked += OnUpdateButtonClicked;
+            Upgrade.clicked += OnUpdateButtonClicked;
         }
 
-        if (destroyButton != null)
+        if (destroy != null)
         {
-            destroyButton.clicked += OnDestroyButtonClicked;
+            destroy.clicked += OnDestroyButtonClicked;
         }
 
         root.visible = false;
@@ -81,35 +81,35 @@ public class TowerMenu : MonoBehaviour
         }
 
         // Haal de beschikbare credits op van de GameManager
-        int availableCredits = GameManager.Instance.GetCredits();
+        int availableCredits = GameManger.Instance.GetCredits();
 
         // Gebruik de beschikbare credits om de menuknoppen in of uit te schakelen
         if (selectedSite.Level == SiteLevel.Level1)
         {
             // Voor Level1: Archers beschikbaar, anderen niet
-            archerButton.SetEnabled(true);
-            swordButton.SetEnabled(false);
-            wizardButton.SetEnabled(false);
-            updateButton.SetEnabled(false);
-            destroyButton.SetEnabled(true);
+            archer.SetEnabled(true);
+            sword.SetEnabled(false);
+            wizard.SetEnabled(false);
+            Upgrade.SetEnabled(false);
+            destroy.SetEnabled(true);
         }
         else if (selectedSite.Level == SiteLevel.Level2)
         {
             // Voor Level2: Archers en Swords beschikbaar, Wizard en Update niet
-            archerButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Archer, selectedSite.Level));
-            swordButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Sword, selectedSite.Level));
-            wizardButton.SetEnabled(false);
-            updateButton.SetEnabled(false);
-            destroyButton.SetEnabled(true);
+            archer.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Archer, selectedSite.Level));
+            sword.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Sword, selectedSite.Level));
+            wizard.SetEnabled(true);
+            Upgrade.SetEnabled(true);
+            destroy.SetEnabled(true);
         }
         else if (selectedSite.Level == SiteLevel.Level3)
         {
             // Voor Level3: Alle torens en Upgrade beschikbaar
-            archerButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Archer, selectedSite.Level));
-            swordButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Sword, selectedSite.Level));
-            wizardButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
-            updateButton.SetEnabled(availableCredits >= GameManager.Instance.GetCost(selectedSite.TowerType, selectedSite.Level + 1));
-            destroyButton.SetEnabled(true);
+            archer.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Archer, selectedSite.Level));
+            sword.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Sword, selectedSite.Level));
+            wizard.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
+            Upgrade.SetEnabled(availableCredits >= GameManger.Instance.GetCost(selectedSite.TowerType, selectedSite.Level + 1));
+            destroy.SetEnabled(true);
         }
     }
 
@@ -117,17 +117,17 @@ public class TowerMenu : MonoBehaviour
 
     private void OnArcherButtonClicked()
     {
-        GameManager.Instance.Build(TowerType.Archer, SiteLevel.Level1);
+        GameManger.Instance.Build(TowerType.Archer, SiteLevel.Level1);
     }
 
     private void OnSwordButtonClicked()
     {
-        GameManager.Instance.Build(TowerType.Sword, SiteLevel.Level1);
+        GameManger.Instance.Build(TowerType.Sword, SiteLevel.Level1);
     }
 
     private void OnWizardButtonClicked()
     {
-        GameManager.Instance.Build(TowerType.Wizard, SiteLevel.Level1);
+        GameManger.Instance.Build(TowerType.Wizard, SiteLevel.Level1);
     }
 
     private void OnUpdateButtonClicked()
@@ -170,29 +170,29 @@ public class TowerMenu : MonoBehaviour
     private void OnDestroy()
     {
         // Controleer of de knopobjecten niet null zijn om NullReferenceException te voorkomen
-        if (archerButton != null)
+        if (archer != null)
         {
-            archerButton.clicked -= OnArcherButtonClicked;
+            archer.clicked -= OnArcherButtonClicked;
         }
 
-        if (swordButton != null)
+        if (sword != null)
         {
-            swordButton.clicked -= OnSwordButtonClicked;
+            sword.clicked -= OnSwordButtonClicked;
         }
 
-        if (wizardButton != null)
+        if (wizard != null)
         {
-            wizardButton.clicked -= OnWizardButtonClicked;
+            wizard.clicked -= OnWizardButtonClicked;
         }
 
-        if (updateButton != null)
+        if (Upgrade != null)
         {
-            updateButton.clicked -= OnUpdateButtonClicked;
+            Upgrade.clicked -= OnUpdateButtonClicked;
         }
 
-        if (destroyButton != null)
+        if (destroy != null)
         {
-            destroyButton.clicked -= OnDestroyButtonClicked;
+            destroy.clicked -= OnDestroyButtonClicked;
         }
     }
 
