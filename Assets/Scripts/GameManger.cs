@@ -28,6 +28,9 @@ public class GameManger : MonoBehaviour
     private int health;
     private int currentWave;
     public TopMenu topMenu;
+    public GameObject TowerMenu;
+
+    private TowerMenu towerMenu;
 
     private ConstructionSite selectedSite; // Remember the selected site
 
@@ -46,6 +49,7 @@ public class GameManger : MonoBehaviour
     }
     void Start()
     {
+        towerMenu = TowerMenu.GetComponent<TowerMenu>();
         StartGame(); // Start het spel, inclusief het initialiseren van golfinformatie, credits, enz.
         currentWave = 0; // Zorg ervoor dat currentWave correct is geïnitialiseerd voordat de golven worden gestart
         StartNextWave(); // Start de eerste golf van vijanden
@@ -59,7 +63,7 @@ public class GameManger : MonoBehaviour
         selectedSite = site;
 
         // Pass the selected site to the TowerMenu
-        TowerMenu.Instance.SetSite(site);
+        towerMenu.SetSite(null);
 
     }
     public void StartNextWave()
@@ -127,7 +131,7 @@ public class GameManger : MonoBehaviour
         selectedSite.SetTower(towerInstance, level, type); // Voeg level en type toe als argumenten
 
         // Geef null door aan de SetSite-functie in TowerMenu om het menu te verbergen
-        TowerMenu.Instance.SetSite(null);
+        towerMenu.SetSite(null);
     }
     public void StartGame()
     {

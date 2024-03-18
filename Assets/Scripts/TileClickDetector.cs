@@ -75,103 +75,58 @@ public class TileClickDetector : MonoBehaviour
     // Update is called once per frame 
 
     void Update()
-
     {
-
         // Check for a left mouse button click 
-
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
-
         {
-
-            DetectTileClicked();
-
+            DetectTileClicked(); // This could potentially cause a NullReferenceException
         }
-
     }
-
-
 
     void DetectTileClicked()
-
     {
+        if (cam == null || tilemap == null || sites == null)
+        {
+            Debug.LogError("One or more required components are not initialized.");
+            return;
+        }
 
         // Convert mouse click position to world space 
-
         Vector3 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
-
         mouseWorldPos.z = 0; // Ensure the z-position is set correctly for 2D 
 
-
-
         // Convert world position to tilemap cell position 
-
         Vector3Int cellPosition = tilemap.WorldToCell(mouseWorldPos);
-
         cellPosition.z = 0; // don't know why this is needed 
 
-
-
         // Check if the clicked cell contains a tile 
-
         TileBase clickedTile = tilemap.GetTile(cellPosition);
 
-
-
         if (clickedTile != null)
-
         {
-
             // Tile was clicked - you can check specific properties or tile types here 
-
-
-
-            // Example: Check for a specific tile (by name, for instance) 
+            Debug.Log("Tile clicked: " + clickedTile.name);
 
             if (clickedTile.name == "buildingPlaceGrass")
-
             {
-
                 SelectedSite = null;
-
                 foreach (var site in sites)
-
                 {
-
                     if (cellPosition == site.TilePosition)
-
                     {
-
                         SelectedSite = site;
-
                         break;
-
                     }
-
                 }
-
             }
-
             else
-
             {
-
                 SelectedSite = null;
-
             }
-
         }
-
         else
-
         {
-
             SelectedSite = null;
-
         }
-
-
-
     }
-
 }
