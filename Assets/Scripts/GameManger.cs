@@ -32,7 +32,7 @@ public class GameManger : MonoBehaviour
 
     private TowerMenu towerMenu;
 
-    private ConstructionSite selectedSite; // Remember the selected site
+    private ConstructionSite selectedSite;
 
     void Awake()
     {
@@ -63,9 +63,9 @@ public class GameManger : MonoBehaviour
         selectedSite = site;
 
         // Pass the selected site to the TowerMenu
-        towerMenu.SetSite(null);
-
+        towerMenu.SetSite(site);
     }
+
     public void StartNextWave()
     {
         if (currentWave < waves.Length && enemiesRemaining <= 0) // Controleer of er geen vijanden meer zijn voordat je doorgaat naar de volgende golf
@@ -136,7 +136,7 @@ public class GameManger : MonoBehaviour
     public void StartGame()
     {
         // Stel de startwaarden in
-        credits = 200;
+        credits = 500;
         health = 10;
         currentWave = 1;
 

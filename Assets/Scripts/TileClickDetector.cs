@@ -118,6 +118,12 @@ public class TileClickDetector : MonoBehaviour
                         break;
                     }
                 }
+
+                // Pass the selected site to the GameManger
+                if (SelectedSite != null)
+                {
+                    GameManger.Instance.SelectSite(SelectedSite);
+                }
             }
             else
             {
@@ -129,4 +135,5 @@ public class TileClickDetector : MonoBehaviour
             SelectedSite = null;
         }
     }
+
 }

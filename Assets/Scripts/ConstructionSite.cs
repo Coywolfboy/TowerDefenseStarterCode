@@ -36,6 +36,12 @@ public class ConstructionSite
         return WorldPosition; // Gebruik de wereldpositie van de bouwplaats
     }
 
+    // Methode om de toren op te halen
+    public GameObject GetTower()
+    {
+        return tower;
+    }
+
     // Vermoedelijk heb je een methode nodig om het niveau van de bouwplaats in te stellen
     public void SetLevel(SiteLevel newLevel)
     {
