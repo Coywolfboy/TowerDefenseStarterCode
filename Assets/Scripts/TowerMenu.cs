@@ -118,37 +118,37 @@ public class TowerMenu : MonoBehaviour
         int availableCredits = GameManger.Instance.GetCredits();
 
         // Gebruik de beschikbare credits om de menuknoppen in of uit te schakelen
-        if (selectedSite.Level == SiteLevel.Level1)
+        if (selectedSite.Level == SiteLevel.Level0)
         {
-            // Voor Level1: Archers beschikbaar, anderen niet
-            archer.SetEnabled(true);
-            sword.SetEnabled(true);
-            wizard.SetEnabled(true);
-            Upgrade.SetEnabled(true);
-            destroy.SetEnabled(true);
-        }
-        else if (selectedSite.Level == SiteLevel.Level2)
-        {
-            // Voor Level2: Archers en Swords beschikbaar, Wizard en Update niet
+            // Voor Level0: Toon alleen de knoppen voor het bouwen van torens
             archer.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Archer, selectedSite.Level));
             sword.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Sword, selectedSite.Level));
-            wizard.SetEnabled(true);
-            Upgrade.SetEnabled(true);
-            destroy.SetEnabled(true);
+            wizard.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
+            Upgrade.SetEnabled(false); // De upgrade-knop is niet beschikbaar op niveau 0
+            destroy.SetEnabled(false); // De vernietigingsknop is niet beschikbaar op niveau 0
         }
-        else if (selectedSite.Level == SiteLevel.Level3)
+        else if (selectedSite.Level < SiteLevel.Level3)
         {
-            // Voor Level3: Alle torens en Upgrade beschikbaar
+            // Voor Level1 en Level2: Toon de upgrade-knop en alle torenbouwknoppen
             archer.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Archer, selectedSite.Level));
             sword.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Sword, selectedSite.Level));
             wizard.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
             Upgrade.SetEnabled(availableCredits >= GameManger.Instance.GetCost(selectedSite.TowerType, selectedSite.Level + 1));
-            destroy.SetEnabled(true);
+            destroy.SetEnabled(true); // De vernietigingsknop is altijd beschikbaar voor upgradebaar niveau
         }
+        else if (selectedSite.Level == SiteLevel.Level3)
+        {
+            // Voor Level3: Toon alleen de vernietigingsknop, upgrade-knop is niet beschikbaar
+            archer.SetEnabled(false); // De torenbouwknoppen zijn niet beschikbaar op niveau 3
+            sword.SetEnabled(false);
+            wizard.SetEnabled(false);
+            Upgrade.SetEnabled(false); // De upgrade-knop is niet beschikbaar op niveau 3
+            destroy.SetEnabled(true); // De vernietigingsknop is altijd beschikbaar voor niveau 3
+        }
+
+        // Toon of verberg het menu op basis van de geselecteerde site
+        root.visible = selectedSite != null;
     }
-
-
-
     private void OnArcherButtonClicked()
     {
         GameManger.Instance.Build(TowerType.Archer, SiteLevel.Level0);
@@ -166,7 +166,7 @@ public class TowerMenu : MonoBehaviour
 
     private void OnUpdateButtonClicked()
     {
-        // Check of selectedSite niet null is
+        // Controleer of de geselecteerde site niet null is
         if (selectedSite != null)
         {
             // Haal het huidige niveau van de geselecteerde site op
@@ -181,11 +181,19 @@ public class TowerMenu : MonoBehaviour
                 // Stel het nieuwe niveau in voor de geselecteerde site
                 selectedSite.SetLevel(newLevel);
 
-                // Evalueer het menu opnieuw
-                EvaluateMenu();
+                // Update de UI direct zonder de EvaluateMenu-methode te gebruiken
+                UpdateUI();
             }
         }
     }
+
+    private void UpdateUI()
+    {
+        // Update de UI-elementen rechtstreeks zonder rekening te houden met de beschikbare credits
+        // Dit kan bijvoorbeeld de status van de upgrade-knop direct aanpassen
+        Upgrade.SetEnabled(selectedSite != null && selectedSite.GetLevel() < SiteLevel.Level3);
+    }
+
 
     private void OnDestroyButtonClicked()
     {
