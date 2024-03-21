@@ -9,10 +9,12 @@ public class TopMenu : MonoBehaviour
     public Button startWaveButton;
     public void UpdateTopMenuLabels(int credits, int health, int currentWave)
     {
+        Debug.Log("Updating top menu labels: Credits: " + credits + ", Health: " + health + ", Wave: " + currentWave);
         creditsLabel.text = "Credits: " + credits;
         healthLabel.text = "Health: " + health;
         waveLabel.text = "Wave: " + currentWave;
     }
+
     private void Start()
     {
         // Voeg een luisteraar toe aan de StartWaveButton
@@ -49,4 +51,10 @@ public class TopMenu : MonoBehaviour
         // Roep de StartWave-methode aan van GameManager om de volgende wave te starten
         GameManger.Instance.StartWave(GameManger.Instance.GetCurrentWaveIndex() + 1); // Start de volgende wave
     }
+
+    public void EnableWaveButton()
+    {
+        startWaveButton.interactable = true;
+    }
+
 }

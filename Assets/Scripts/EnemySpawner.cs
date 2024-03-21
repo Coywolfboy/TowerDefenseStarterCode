@@ -55,6 +55,7 @@ public class EnemySpawner : MonoBehaviour
             var script = newEnemy.GetComponent<Enemy>();
             script.path = path;
             script.target = selectedPath[1];
+            GameManger.Instance.AddInGameEnemy(); // Voeg deze regel toe om het aantal vijanden in het spel bij te houden
         }
         else
         {

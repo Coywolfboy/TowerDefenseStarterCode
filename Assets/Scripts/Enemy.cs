@@ -25,7 +25,7 @@ public class Enemy : MonoBehaviour
     {
         if (GameManger.Instance != null)
         {
-            GameManger.Instance.DecreaseEnemyCount(); // Decrease the remaining enemy count when this enemy is destroyed
+            GameManger.Instance.RemoveInGameEnemy(); // Blijf deze regel behouden om het aantal vijanden in het spel bij te houden
         }
     }
 

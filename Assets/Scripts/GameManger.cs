@@ -33,7 +33,8 @@ public class GameManger : MonoBehaviour
     private TowerMenu towerMenu;
 
     private ConstructionSite selectedSite;
-
+    private int enemyInGameCounter = 0;
+    private bool waveActive = false;
     void Awake()
     {
         // Singleton pattern
@@ -47,6 +48,7 @@ public class GameManger : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     void Start()
     {
         towerMenu = TowerMenu.GetComponent<TowerMenu>();
@@ -54,8 +56,10 @@ public class GameManger : MonoBehaviour
         currentWave = 0; // Zorg ervoor dat currentWave correct is geïnitialiseerd voordat de golven worden gestart
         StartNextWave(); // Start de eerste golf van vijanden
     }
-
-
+    public void AddInGameEnemy()
+    {
+        enemyInGameCounter++;
+    }
     // Function to select a construction site
     public void SelectSite(ConstructionSite site)
     {
@@ -65,15 +69,38 @@ public class GameManger : MonoBehaviour
         // Pass the selected site to the TowerMenu
         towerMenu.SetSite(site);
     }
+    public void RemoveInGameEnemy()
+    {
+        enemyInGameCounter--;
 
+        if (!waveActive && enemyInGameCounter <= 0)
+        {
+            if (currentWave == waves.Length - 1 && enemiesRemaining <= 0)
+            {
+                EndGame();
+            }
+            else
+            {
+                // Controleer of topMenu niet null is voordat je de methode aanroept
+                if (topMenu != null)
+                {
+                    topMenu.EnableWaveButton(); // Roep de juiste methode aan op het topMenu-object
+                }
+                else
+                {
+                    Debug.LogWarning("TopMenu is niet toegewezen aan GameManger.");
+                }
+            }
+        }
+    }
     public void StartNextWave()
     {
-        if (currentWave < waves.Length && enemiesRemaining <= 0) // Controleer of er geen vijanden meer zijn voordat je doorgaat naar de volgende golf
+        if (currentWave < waves.Length && enemiesRemaining <= 0)
         {
             WaveInfo nextWave = waves[currentWave];
             EnemySpawner.Instance.SpawnWave(nextWave);
-            currentWave++;
-            topMenu.UpdateTopMenuLabels(credits, health, currentWave);
+            topMenu.UpdateTopMenuLabels(credits, health, currentWave + 1); // Update the labels with the correct wave index
+            currentWave++; // Increment the wave index after each completed wave
         }
         else if (currentWave >= waves.Length)
         {
@@ -84,6 +111,8 @@ public class GameManger : MonoBehaviour
             Debug.Log("Kan de volgende golf niet starten omdat er nog vijanden zijn.");
         }
     }
+
+
     public void DecreaseEnemyCount()
     {
         enemiesRemaining--;
@@ -124,13 +153,10 @@ public class GameManger : MonoBehaviour
         // Haal de positie van de ConstructionSite op
         Vector3 buildPosition = selectedSite.GetBuildPosition();
 
-        // Instantiate de toren op de positie van de ConstructionSite
         GameObject towerInstance = Instantiate(towerPrefab, buildPosition, Quaternion.identity);
 
         // Configureer de geselecteerde site om de toren in te stellen
-        selectedSite.SetTower(towerInstance, level, type); // Voeg level en type toe als argumenten
-
-        // Geef null door aan de SetSite-functie in TowerMenu om het menu te verbergen
+        selectedSite.SetTower(towerInstance, level, type); // Voeg level en type toe als
         towerMenu.SetSite(null);
     }
     public void StartGame()
@@ -138,11 +164,10 @@ public class GameManger : MonoBehaviour
         // Stel de startwaarden in
         credits = 500;
         health = 10;
-        currentWave = 1;
-
-        // Update de labels in het TopMenu
-        topMenu.UpdateTopMenuLabels(credits, health, currentWave);
+        currentWave = 0; // Initialize with 0 to start with the first wave
+        topMenu.UpdateTopMenuLabels(credits, health, currentWave + 1); // Update the labels with the correct wave index
     }
+
 
 
     public void AttackGate()
@@ -191,6 +216,8 @@ public class GameManger : MonoBehaviour
     }
     public void StartWave(int waveIndex)
     {
+        enemyInGameCounter = 0; // Reset de counter bij het starten van een nieuwe golf
+
         if (waveIndex < waves.Length)
         {
             WaveInfo wave = waves[waveIndex];
@@ -204,7 +231,16 @@ public class GameManger : MonoBehaviour
     }
     public int GetCurrentWaveIndex()
     {
-        return currentWave - 1;
+        return currentWave - 1; // Geef de huidige golfindex terug
+    }
+
+    public void EndGame()
+    {
+        // Voeg hier eventuele extra logica toe die moet worden uitgevoerd voordat de game wordt gestopt
+
+        // Stop de game
+        Debug.Log("Game Over!");
+        Application.Quit(); // Sluit de game af
     }
 
 
