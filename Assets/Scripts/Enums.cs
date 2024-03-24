@@ -16,3 +16,12 @@ public enum SiteLevel
     Level2,
     Level3
 }
+public enum FXEventType
+{
+    GameStart,
+    WaveStart,
+    EnemyReachEnd,
+    GameWin,
+    GameLose,
+    TowerBuilt
+}
