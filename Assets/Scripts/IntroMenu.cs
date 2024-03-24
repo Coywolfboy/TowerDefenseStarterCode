@@ -52,15 +52,19 @@ public class IntroMenu : MonoBehaviour
 
     private void StartGame()
     {
-        // Load the GameScene
-        Debug.Log("GG");
-        SceneManager.LoadScene("GameScene");
+        if (nameInputField != null && nameInputField.text.Length >= 3)
+        {
+            string playerName = nameInputField.text;
+            HighScoreManager.Instance.AddHighScore(playerName, 0); // Voeg de speler toe aan de high scores met een score van 0
+            SceneManager.LoadScene("GameScene");
+        }
     }
+
 
     private void QuitGame()
     {
-        // Quit the application
-        Application.Quit();
+        Debug.Log("Game Over!");
+        Application.Quit(); // Sluit de game af
     }
 
 }

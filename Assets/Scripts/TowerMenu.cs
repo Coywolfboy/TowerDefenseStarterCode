@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -30,6 +31,8 @@ public class TowerMenu : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("TowerMenu Start() is called!");
+
         root = GetComponent<UIDocument>().rootVisualElement;
 
         archer = root.Q<Button>("archer");
@@ -55,7 +58,7 @@ public class TowerMenu : MonoBehaviour
 
         if (Upgrade != null)
         {
-            Upgrade.clicked += OnUpdateButtonClicked;
+            Upgrade.clicked += OnUpdateButtonClicked; // Zorg ervoor dat de methode correct is gekoppeld
         }
 
         if (destroy != null)
@@ -64,7 +67,10 @@ public class TowerMenu : MonoBehaviour
         }
 
         root.visible = false;
+        Debug.Log("TowerMenu Start() is called!");
+
     }
+
     private void CheckHideMenu(Vector3 clickPosition)
     {
         RaycastHit2D hit = Physics2D.Raycast(clickPosition, Vector2.zero);
@@ -81,6 +87,8 @@ public class TowerMenu : MonoBehaviour
     }
     void Update()
     {
+        Debug.Log("TowerMenu Update() is called!");
+
         if (Input.GetMouseButtonDown(0))
         {
             // Bepaal de positie van de muisklik in de wereldruimte
@@ -124,8 +132,8 @@ public class TowerMenu : MonoBehaviour
             archer.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Archer, selectedSite.Level));
             sword.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Sword, selectedSite.Level));
             wizard.SetEnabled(availableCredits >= GameManger.Instance.GetCost(TowerType.Wizard, selectedSite.Level));
-            Upgrade.SetEnabled(false); // De upgrade-knop is niet beschikbaar op niveau 0
-            destroy.SetEnabled(false); // De vernietigingsknop is niet beschikbaar op niveau 0
+            Upgrade.SetEnabled(true); // De upgrade-knop is niet beschikbaar op niveau 0
+            destroy.SetEnabled(true); // De vernietigingsknop is niet beschikbaar op niveau 0
         }
         else if (selectedSite.Level < SiteLevel.Level3)
         {
@@ -166,37 +174,15 @@ public class TowerMenu : MonoBehaviour
 
     private void OnUpdateButtonClicked()
     {
-        // Controleer of de geselecteerde site niet null is
-        if (selectedSite != null)
-        {
-            // Haal het huidige niveau van de geselecteerde site op
-            SiteLevel currentLevel = selectedSite.GetLevel();
+        if (selectedSite == null) return;
 
-            // Controleer of het huidige niveau minder is dan Level3
-            if (currentLevel < SiteLevel.Level3)
-            {
-                // Verhoog het niveau met één
-                SiteLevel newLevel = currentLevel + 1;
-
-                // Stel het nieuwe niveau in voor de geselecteerde site
-                selectedSite.SetLevel(newLevel);
-
-                // Update de UI direct zonder de EvaluateMenu-methode te gebruiken
-                UpdateUI();
-            }
-        }
+        SiteLevel nextLevel = selectedSite.Level + 1; // Verhoog het level met één.
+        GameManger.Instance.Build(selectedSite.TowerType, nextLevel);
     }
-
-    private void UpdateUI()
-    {
-        // Update de UI-elementen rechtstreeks zonder rekening te houden met de beschikbare credits
-        // Dit kan bijvoorbeeld de status van de upgrade-knop direct aanpassen
-        Upgrade.SetEnabled(selectedSite != null && selectedSite.GetLevel() < SiteLevel.Level3);
-    }
-
-
     private void OnDestroyButtonClicked()
     {
+        Debug.Log("Destroy button clicked!");
+
         // Controleer of de geselecteerde site niet null is
         if (selectedSite != null)
         {

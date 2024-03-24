@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -11,30 +9,20 @@ public class Enemy : MonoBehaviour
     public GameObject target { get; set; }
     private int pathIndex = 1;
 
+    // Functie om schade toe te brengen aan de vijand
     public void TakeDamage(int damage)
     {
         health -= damage;
 
         if (health <= 0)
         {
-            // Voer hier eventuele acties uit bij vernietiging van de vijand
+            GameManger.Instance.AddCreditsOnEnemyDestroy(); // Voeg credits toe wanneer een vijand wordt vernietigd
             Destroy(gameObject);
         }
     }
-    private void OnDestroy()
-    {
-        if (GameManger.Instance != null)
-        {
-            GameManger.Instance.RemoveInGameEnemy(); // Blijf deze regel behouden om het aantal vijanden in het spel bij te houden
-        }
-    }
 
 
-    void Start()
-    {
-
-    }
-
+    // Update is called once per frame
     void Update()
     {
         float step = speed * Time.deltaTime;
@@ -48,6 +36,16 @@ public class Enemy : MonoBehaviour
             if (target == null)
             {
                 Destroy(gameObject);
+
+                // Check welk pad de vijand volgt en verminder de gezondheid dienovereenkomstig
+                if (path == Path.Path1)
+                {
+                    GameManger.Instance.AttackGate(Path.Path1);
+                }
+                else if (path == Path.Path2)
+                {
+                    GameManger.Instance.AttackGate(Path.Path2);
+                }
             }
         }
     }

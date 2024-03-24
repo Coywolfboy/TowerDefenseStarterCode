@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManger : MonoBehaviour
 {
     public static GameManger Instance; // Singleton instance
-
     // Lists of tower prefabs
     public List<GameObject> Archers;
     public List<GameObject> Swords;
@@ -18,7 +18,7 @@ public class GameManger : MonoBehaviour
     };
     public WaveInfo[] waves = new WaveInfo[]
     {
-        new WaveInfo(10, 1.0f),  // Golf 1: 5 vijanden met een sterkte van 1.0
+        new WaveInfo(20, 1.0f),  // Golf 1: 5 vijanden met een sterkte van 1.0
         new WaveInfo(15, 1.2f),  // Golf 2: 7 vijanden met een sterkte van 1.2
         new WaveInfo(20, 1.5f),  // Golf 3: 10 vijanden met een sterkte van 1.5
         new WaveInfo(25, 2.0f)  // Golf 3: 10 vijanden met een sterkte van 1.5
@@ -35,6 +35,10 @@ public class GameManger : MonoBehaviour
     private ConstructionSite selectedSite;
     private int enemyInGameCounter = 0;
     private bool waveActive = false;
+    private HighScoreManager highScoreManager;
+
+    public int CurrentWaveIndex { get { return currentWave; } }
+
     void Awake()
     {
         // Singleton pattern
@@ -52,9 +56,10 @@ public class GameManger : MonoBehaviour
     void Start()
     {
         towerMenu = TowerMenu.GetComponent<TowerMenu>();
-        StartGame(); // Start het spel, inclusief het initialiseren van golfinformatie, credits, enz.
-        currentWave = 0; // Zorg ervoor dat currentWave correct is geïnitialiseerd voordat de golven worden gestart
-        StartNextWave(); // Start de eerste golf van vijanden
+        highScoreManager = FindObjectOfType<HighScoreManager>(); // Find the HighScoreManager in the scene
+        StartGame(); // Start the game including initializing credits, health, etc.
+        currentWave = 0; // Initialize with 0 to start with the first wave
+        StartNextWave(); // Start the first wave of enemies
     }
     public void AddInGameEnemy()
     {
@@ -77,18 +82,22 @@ public class GameManger : MonoBehaviour
         {
             if (currentWave == waves.Length - 1 && enemiesRemaining <= 0)
             {
-                EndGame();
+                // Set GameIsWon in the HighScoreManager to true
+                highScoreManager.GameIsWon = true;
+                // Pass the current credits to AddHighScore function
+                highScoreManager.AddHighScore("Player", credits);
+                // Load the HighScoreScene
+                SceneManager.LoadScene("HighScoreScene");
             }
             else
             {
-                // Controleer of topMenu niet null is voordat je de methode aanroept
                 if (topMenu != null)
                 {
-                    topMenu.EnableWaveButton(); // Roep de juiste methode aan op het topMenu-object
+                    topMenu.EnableWaveButton();
                 }
                 else
                 {
-                    Debug.LogWarning("TopMenu is niet toegewezen aan GameManger.");
+                    Debug.LogWarning("TopMenu is not assigned to GameManger.");
                 }
             }
         }
@@ -97,10 +106,10 @@ public class GameManger : MonoBehaviour
     {
         if (currentWave < waves.Length && enemiesRemaining <= 0)
         {
-            WaveInfo nextWave = waves[currentWave];
+            WaveInfo nextWave = waves[currentWave]; // Get the wave info based on the current wave index
             EnemySpawner.Instance.SpawnWave(nextWave);
-            topMenu.UpdateTopMenuLabels(credits, health, currentWave + 1); // Update the labels with the correct wave index
-            currentWave++; // Increment the wave index after each completed wave
+            currentWave++; // Increment the wave index after starting the current wave
+            topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
         }
         else if (currentWave >= waves.Length)
         {
@@ -155,28 +164,52 @@ public class GameManger : MonoBehaviour
 
         GameObject towerInstance = Instantiate(towerPrefab, buildPosition, Quaternion.identity);
 
+        // Voeg credits toe wanneer een toren wordt gebouwd
+        int towerCost = GetCost(type, level);
+        AddCredits(-towerCost); // Verminder het aantal credits met de kosten van de toren
+
         // Configureer de geselecteerde site om de toren in te stellen
         selectedSite.SetTower(towerInstance, level, type); // Voeg level en type toe als
         towerMenu.SetSite(null);
     }
+
+
     public void StartGame()
     {
         // Stel de startwaarden in
-        credits = 500;
-        health = 10;
+        credits = 225;
+        health = 2;
         currentWave = 0; // Initialize with 0 to start with the first wave
-        topMenu.UpdateTopMenuLabels(credits, health, currentWave + 1); // Update the labels with the correct wave index
+        topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
     }
 
 
 
-    public void AttackGate()
+    public void AttackGate(Path path)
     {
-        // Verminder de gezondheid met 1
-        health--;
-        topMenu.SetHealthLabel("Health: " + health);
-    }
+        if (path == Path.Path1 || path == Path.Path2)
+        {
+            health--;
 
+            if (health <= 0)
+            {
+                // Set GameIsWon in the HighScoreManager to false
+                highScoreManager.GameIsWon = false;
+                // Pass the current credits to AddHighScore function
+                highScoreManager.AddHighScore("Player", credits);
+                // Load the HighScoreScene
+                SceneManager.LoadScene("HighScoreScene");
+            }
+            else
+            {
+                topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update de labels met de juiste wave-index
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Unknown path: " + path);
+        }
+    }
     public void AddCredits(int amount)
     {
         // Voeg credits toe
@@ -196,7 +229,10 @@ public class GameManger : MonoBehaviour
         // Return het huidige aantal credits
         return credits;
     }
-
+    public int GetHealth()
+    {
+        return health; // 'health' is de variabele die de huidige gezondheidswaarde bijhoudt
+    }
     public int GetCost(TowerType type, SiteLevel level, bool selling = false)
     {
         // Bepaal de kosten voor het bouwen of verkopen van een toren op basis van het type, niveau en of het gaat om verkopen
@@ -223,26 +259,38 @@ public class GameManger : MonoBehaviour
             WaveInfo wave = waves[waveIndex];
             Debug.Log("Starting wave " + (waveIndex + 1) + " with " + wave.enemyCount + " enemies of strength " + wave.enemyStrength);
             EnemySpawner.Instance.SpawnWave(wave);
+            currentWave = waveIndex; // Set the current wave index to the new wave index
+            topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
         }
         else
         {
             Debug.LogWarning("Wave index out of range: " + waveIndex);
         }
     }
+
     public int GetCurrentWaveIndex()
     {
         return currentWave - 1; // Geef de huidige golfindex terug
     }
-
-    public void EndGame()
+   
+    public void AddCreditsOnWaveCompletion()
     {
-        // Voeg hier eventuele extra logica toe die moet worden uitgevoerd voordat de game wordt gestopt
-
-        // Stop de game
-        Debug.Log("Game Over!");
-        Application.Quit(); // Sluit de game af
+        AddCredits(400); // Voeg 400 credits toe bij het voltooien van een golf
+    }
+    // Voeg een methode toe om credits toe te voegen wanneer een vijand wordt vernietigd
+    public void AddCreditsOnEnemyDestroy()
+    {
+        AddCredits(10); // Voeg 10 credits toe wanneer een vijand wordt vernietigd
     }
 
+    // In de EndGame-methode of op een geschikt punt waar het spel eindigt
+    public void EndGame()
+    {
+        // Voeg de score toe aan de HighScoreManager
+        highScoreManager.AddHighScore("Player", credits); // Hier gaat "Player" de naam van de speler zijn
+                                                          // Laad de HighScoreScene
+        SceneManager.LoadScene("HighScoreScene");
+    }
 
 
     public class WaveInfo
