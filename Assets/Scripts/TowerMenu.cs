@@ -31,7 +31,6 @@ public class TowerMenu : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("TowerMenu Start() is called!");
 
         root = GetComponent<UIDocument>().rootVisualElement;
 
@@ -67,7 +66,6 @@ public class TowerMenu : MonoBehaviour
         }
 
         root.visible = false;
-        Debug.Log("TowerMenu Start() is called!");
 
     }
 
@@ -87,7 +85,6 @@ public class TowerMenu : MonoBehaviour
     }
     void Update()
     {
-        Debug.Log("TowerMenu Update() is called!");
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -181,7 +178,6 @@ public class TowerMenu : MonoBehaviour
     }
     private void OnDestroyButtonClicked()
     {
-        Debug.Log("Destroy button clicked!");
 
         // Controleer of de geselecteerde site niet null is
         if (selectedSite != null)

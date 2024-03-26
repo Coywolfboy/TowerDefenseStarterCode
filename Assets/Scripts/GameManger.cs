@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,12 +25,14 @@ public class GameManger : MonoBehaviour
         new WaveInfo(25, 2.0f)  // Golf 3: 10 vijanden met een sterkte van 1.5
     };
     private int enemiesRemaining;
-    private int credits;
-    private int health;
-    private int currentWave;
-    public TopMenu topMenu;
+    private int currentCredits = 225;
+    private int currentHealth = 5;
+    private int currentWave = 1;
+    private TopMenu topMenu;
+    public GameObject TopMenu;
     public GameObject TowerMenu;
 
+    private bool isWaveButtonPressed = false;
     private TowerMenu towerMenu;
 
     private ConstructionSite selectedSite;
@@ -55,12 +58,27 @@ public class GameManger : MonoBehaviour
 
     void Start()
     {
+        InitializeGame();
+        currentCredits = 225;
+        currentHealth = 5;
+        currentWave = 1;
         towerMenu = TowerMenu.GetComponent<TowerMenu>();
-        highScoreManager = FindObjectOfType<HighScoreManager>(); // Find the HighScoreManager in the scene
-        StartGame(); // Start the game including initializing credits, health, etc.
-        currentWave = 0; // Initialize with 0 to start with the first wave
-        StartNextWave(); // Start the first wave of enemies
+
+        // Use FindObjectOfType only if TopMenu is not assigned via the inspector.
+        if (topMenu != null)
+        {
+            topMenu.GetComponent<TopMenu>().SetCreditsLabel("Credits: " + currentCredits);
+            topMenu.GetComponent<TopMenu>().SetHealthLabel("Gate Health: " + currentHealth);
+            topMenu.GetComponent<TopMenu>().SetWaveLabel("Wave: " + currentWave);
+        }
+        else
+        {
+            Debug.LogError("TopMenu is niet toegewezen in de Inspector!");
+        }
+        highScoreManager = FindObjectOfType<HighScoreManager>(); // Find the HighScoreManager in the scene.
+        StartNextWave(); // Start the first wave of enemies.
     }
+
     public void AddInGameEnemy()
     {
         enemyInGameCounter++;
@@ -85,7 +103,7 @@ public class GameManger : MonoBehaviour
                 // Set GameIsWon in the HighScoreManager to true
                 highScoreManager.GameIsWon = true;
                 // Pass the current credits to AddHighScore function
-                highScoreManager.AddHighScore("Player", credits);
+                highScoreManager.AddHighScore("Player", currentCredits);
                 // Load the HighScoreScene
                 SceneManager.LoadScene("HighScoreScene");
             }
@@ -108,8 +126,16 @@ public class GameManger : MonoBehaviour
         {
             WaveInfo nextWave = waves[currentWave]; // Get the wave info based on the current wave index
             EnemySpawner.Instance.SpawnWave(nextWave);
-            currentWave++; // Increment the wave index after starting the current wave
-            topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
+            currentWave++;
+            if (topMenu != null)
+            {
+                topMenu.UpdateTopMenuLabels(currentCredits, currentHealth, currentWave);
+            }
+            else
+            {
+                Debug.LogWarning("TopMenu reference is not set in GameManger.");
+            }
+
         }
         else if (currentWave >= waves.Length)
         {
@@ -135,11 +161,17 @@ public class GameManger : MonoBehaviour
     // Function to build a tower
     public void Build(TowerType type, SiteLevel level)
     {
-        // Je kunt niet bouwen als er geen site is geselecteerd
         if (selectedSite == null)
         {
             return;
         }
+        int towerCost = GetCost(type, level);
+        if (currentCredits < towerCost)
+        {
+            Debug.LogWarning("Onvoldoende credits om de toren te bouwen.");
+            return;
+        }
+                RemoveCredits(towerCost); // Update credits en UI
 
         // Selecteer de juiste lijst op basis van het torentype
         List<GameObject> towerList = null;
@@ -156,53 +188,85 @@ public class GameManger : MonoBehaviour
                 break;
         }
 
-        // Gebruik een switch met het niveau om een GameObject-toren te maken
+        // Bouw de toren en update de UI
         GameObject towerPrefab = towerList[(int)level];
-
-        // Haal de positie van de ConstructionSite op
         Vector3 buildPosition = selectedSite.GetBuildPosition();
-
         GameObject towerInstance = Instantiate(towerPrefab, buildPosition, Quaternion.identity);
 
-        // Voeg credits toe wanneer een toren wordt gebouwd
-        int towerCost = GetCost(type, level);
-        AddCredits(-towerCost); // Verminder het aantal credits met de kosten van de toren
-
-        // Configureer de geselecteerde site om de toren in te stellen
-        selectedSite.SetTower(towerInstance, level, type); // Voeg level en type toe als
+        selectedSite.SetTower(towerInstance, level, type);
         towerMenu.SetSite(null);
+        UpdateUI();
     }
 
+    //public void StartGame()
+    //{
+    //    credits = 225;
+    //    health = 5;
+    //    currentWave = 0;
+    //    InitializeGame();
+    //    StartCoroutine(UpdateUIAfterFrame());
+    //}
+    // In GameManger.cs
 
-    public void StartGame()
+
+    public void InitializeGame()
     {
-        // Stel de startwaarden in
-        credits = 225;
-        health = 2;
-        currentWave = 0; // Initialize with 0 to start with the first wave
-        topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
+       
+        StartCoroutine(DelayedUIUpdate());
+    }
+
+    private IEnumerator DelayedUIUpdate()
+    {
+        // Wait until the end of the frame to ensure all UI components are initialized
+        yield return new WaitForEndOfFrame();
+
+        // Now update the UI with the initial game state
+        if (topMenu != null)
+        {
+            topMenu.UpdateTopMenuLabels(currentCredits, currentHealth, currentWave);
+        }
+        else
+        {
+            Debug.LogWarning("TopMenu reference is not set in GameManger.");
+        }
+    }
+    public void UpdateUI()
+    {
+        if (topMenu != null)
+        {
+            topMenu.UpdateTopMenuLabels(currentCredits, currentHealth, currentWave);
+        }
+        else
+        {
+            Debug.LogWarning("TopMenu instance is not found.");
+        }
     }
 
 
 
+
+    public void OnWaveButtonPressed()
+    {
+        isWaveButtonPressed = true;
+    }
     public void AttackGate(Path path)
     {
+        // Assuming path is an enum or similar for different gates
         if (path == Path.Path1 || path == Path.Path2)
         {
-            health--;
-
-            if (health <= 0)
+            currentHealth--;
+            if (topMenu != null)
             {
-                // Set GameIsWon in the HighScoreManager to false
-                highScoreManager.GameIsWon = false;
-                // Pass the current credits to AddHighScore function
-                highScoreManager.AddHighScore("Player", credits);
-                // Load the HighScoreScene
-                SceneManager.LoadScene("HighScoreScene");
+                topMenu.UpdateTopMenuLabels(currentCredits, currentHealth, currentWave);
             }
             else
             {
-                topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update de labels met de juiste wave-index
+                Debug.LogWarning("TopMenu reference is not set in GameManger.");
+            }
+
+            if (currentHealth <= 0)
+            {
+                StartCoroutine(CheckEnemiesAndEndGame());
             }
         }
         else
@@ -210,28 +274,40 @@ public class GameManger : MonoBehaviour
             Debug.LogWarning("Unknown path: " + path);
         }
     }
+    private IEnumerator CheckEnemiesAndEndGame()
+    {
+        // Wait until the wave button has been pressed
+        yield return new WaitUntil(() => isWaveButtonPressed);
+
+        // Then wait until all enemies are destroyed
+        yield return new WaitUntil(() => enemyInGameCounter <= 0);
+
+        // Now go to the high score scene
+        highScoreManager.GameIsWon = false; // Update this based on actual win/loss conditions
+        highScoreManager.AddHighScore("Player", currentCredits);
+        SceneManager.LoadScene("HighScoreScene");
+    }
+
+
     public void AddCredits(int amount)
     {
-        // Voeg credits toe
-        credits += amount;
-        topMenu.SetCreditsLabel("Credits: " + credits);
+        currentCredits += amount;
+        UpdateUI(); // Roep deze methode aan om de UI bij te werken
     }
 
     public void RemoveCredits(int amount)
     {
-        // Verminder credits
-        credits -= amount;
-        topMenu.SetCreditsLabel("Credits: " + credits);
+        currentCredits -= amount;
+        UpdateUI(); // Zorgt ervoor dat de UI direct wordt bijgewerkt
     }
-
     public int GetCredits()
     {
         // Return het huidige aantal credits
-        return credits;
+        return currentCredits;
     }
     public int GetHealth()
     {
-        return health; // 'health' is de variabele die de huidige gezondheidswaarde bijhoudt
+        return currentHealth; // 'health' is de variabele die de huidige gezondheidswaarde bijhoudt
     }
     public int GetCost(TowerType type, SiteLevel level, bool selling = false)
     {
@@ -259,8 +335,9 @@ public class GameManger : MonoBehaviour
             WaveInfo wave = waves[waveIndex];
             Debug.Log("Starting wave " + (waveIndex + 1) + " with " + wave.enemyCount + " enemies of strength " + wave.enemyStrength);
             EnemySpawner.Instance.SpawnWave(wave);
-            currentWave = waveIndex; // Set the current wave index to the new wave index
-            topMenu.UpdateTopMenuLabels(credits, health, currentWave); // Update the labels with the correct wave index
+            currentWave = waveIndex;
+            topMenu.SetWaveLabel("Wave: " + currentWave);
+            topMenu.UpdateTopMenuLabels(GetCredits(), GetHealth(), GetCurrentWaveIndex());
         }
         else
         {
@@ -287,7 +364,7 @@ public class GameManger : MonoBehaviour
     public void EndGame()
     {
         // Voeg de score toe aan de HighScoreManager
-        highScoreManager.AddHighScore("Player", credits); // Hier gaat "Player" de naam van de speler zijn
+        highScoreManager.AddHighScore("Player", currentCredits); // Hier gaat "Player" de naam van de speler zijn
                                                           // Laad de HighScoreScene
         SceneManager.LoadScene("HighScoreScene");
     }

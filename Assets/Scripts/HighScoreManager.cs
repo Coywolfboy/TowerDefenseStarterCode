@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 
 public class HighScoreManager : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class HighScoreManager : MonoBehaviour
     public bool GameIsWon { get; set; }
 
     private List<HighScore> highScores = new List<HighScore>(); // List to store high scores
+    string fileName = "HighScores.txt"; // Bestandsnaam waarin de highscores worden opgeslagen
 
     // Awake function to implement singleton pattern
     private void Awake()
@@ -39,18 +41,38 @@ public class HighScoreManager : MonoBehaviour
     // Function to save high scores to file
     private void SaveHighScores()
     {
-        string json = JsonUtility.ToJson(highScores); // Serialize high scores to JSON
-        PlayerPrefs.SetString("HighScores", json); // Save JSON to player preferences
-        PlayerPrefs.Save(); // Save player preferences
+        using (StreamWriter writer = new StreamWriter(fileName))
+        {
+            foreach (HighScore score in highScores)
+            {
+                writer.WriteLine(score.PlayerName + "," + score.Score);
+            }
+        }
     }
 
     // Function to load high scores from file
     public void LoadHighScores()
     {
-        string json = PlayerPrefs.GetString("HighScores", ""); // Load JSON from player preferences
-        if (!string.IsNullOrEmpty(json))
+        highScores.Clear(); // Clear existing high scores before loading
+        if (File.Exists(fileName))
         {
-            highScores = JsonUtility.FromJson<List<HighScore>>(json); // Deserialize JSON to high scores
+            using (StreamReader reader = new StreamReader(fileName))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] parts = line.Split(',');
+                    if (parts.Length == 2)
+                    {
+                        string playerName = parts[0];
+                        int score;
+                        if (int.TryParse(parts[1], out score))
+                        {
+                            highScores.Add(new HighScore(playerName, score));
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -60,6 +82,7 @@ public class HighScoreManager : MonoBehaviour
         return highScores;
     }
 }
+
 [System.Serializable]
 public class HighScore
 {
